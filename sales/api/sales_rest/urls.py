@@ -17,7 +17,7 @@ urlpatterns = [
         name="api_salespeople",
     ),
     path(
-        "salespeople/<str:vin>/",
+        "salespeople/<int:pk>/",
         api_salesperson,
         name="api_salesperson",
     ),

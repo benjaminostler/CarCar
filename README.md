@@ -57,11 +57,20 @@ From Insomnia and your browser, you can access the manufacturer model endpoints 
 |Delete a manufacturer	|DELETE|	http://localhost:8100/api/manufacturers/:id/ |
 
 
-**Creating a manufacturer**
+**Create a manufacturer**
 To create a manufacturer, you would use the POST HTTP request to the URL http://localhost:8100/api/manufacturers/. Creating a manufacturer requires only the manufacturer's name. The return value of creating a single manufacturer is its name, href, and id.
 ```json
 {
-  "name": "Chrysler"
+  "name": "Hyundai"
+}
+```
+
+The return value of creating, viewing, updating a single manufacturer:
+```json
+{
+	"href": "/api/manufacturers/2/",
+	"id": 2,
+	"name": "Chrysler"
 }
 ```
 
@@ -74,11 +83,11 @@ To update a manufacturer, you would use the manufacturer’s id to reference the
 ```
 
 **Getting the detail of a manufacturer**
-To get the details of a specific manufacturer, you would use the manufacturer’s id. For example, you would use the GET HTTP request to the URL http://localhost:8100/api/manufacturers/1/ to retrieve the details for the manufacturer with the id of 1. The return value of getting a single manufacturer is its name, href, and id.
+To get the details of a specific manufacturer, you would use the manufacturer’s id. For example, you would use the GET HTTP request to the URL http://localhost:8100/api/manufacturers/2/ to retrieve the details for the manufacturer with the id of 2. The return value of getting a single manufacturer is its name, href, and id.
 
 
 **Getting a list of manufacturers**
-To get a list of manufacturers, you would use the GET HTTP request to the URL http://localhost:8100/api/manufacturers/.The list of manufacturers is an object with the key "manufacturers" set to a list of manufacturers.
+To get a list of manufacturers, you would use the GET HTTP request to the URL http://localhost:8100/api/manufacturers/. The list of manufacturers is an object with the key "manufacturers" set to a list of manufacturers.
 
 
 #### Vehicle models
@@ -98,8 +107,8 @@ From Insomnia and your browser, you can access the vehicle model endpoints at th
 To create a vehicle model, you would use the POST HTTP request to the URL http://localhost:8100/api/models/. When you create a vehicle model, it requires the model name, a URL of an image, and the id of the manufacturer.
 ```json
 {
-  "name": "Sebring",
-  "picture_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Chrysler_Sebring_front_20090302.jpg/320px-Chrysler_Sebring_front_20090302.jpg",
+  "name": "Civic",
+  "picture_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMmk9-P-hdKOX_Q520GrtheQ8kstppGvh0bu0X8U67Jv7SOeHODhKGvcp7XIw8-131rz3y19mmnNo&usqp=CAU&ec=48665701",
   "manufacturer_id": 1
 }
 ```
@@ -121,15 +130,15 @@ To get the details of a specific vehicle model, you would use the vehicle model�
 Getting the detail of a vehicle model, or the return value from creating or updating a vehicle model, returns the model's information and the manufacturer's information.
 ```json
 {
-  "href": "/api/models/1/",
-  "id": 1,
-  "name": "Sebring",
-  "picture_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Chrysler_Sebring_front_20090302.jpg/320px-Chrysler_Sebring_front_20090302.jpg",
-  "manufacturer": {
-    "href": "/api/manufacturers/1/",
-    "id": 1,
-    "name": "Daimler-Chrysler"
-  }
+	"href": "/api/models/1/",
+	"id": 1,
+	"name": "Civic",
+	"picture_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMmk9-P-hdKOX_Q520GrtheQ8kstppGvh0bu0X8U67Jv7SOeHODhKGvcp7XIw8-131rz3y19mmnNo&usqp=CAU&ec=48665701",
+	"manufacturer": {
+		"href": "/api/manufacturers/1/",
+		"id": 1,
+		"name": "Honda"
+	}
 }
 ```
 
@@ -449,15 +458,9 @@ For example, you would use the GET HTTP request to the URL http://localhost:8080
 {
 	"status": "finished"
 }
-
-
 ```
 
-
-
-
 **Front-end views**
-
 
 **Service Appointments**
 A page that shows a list of scheduled appointments that contains the details collected in the form: VIN, customer name, date and time of the appointment, the assigned technician's name, and the reason for the service.
@@ -473,17 +476,45 @@ A page that shows the history of all service appointments— both current and ca
 
 
 
+
 ## Sales microservice
 
-The back end of the sales microservice has 4 models: Customer, Salesperson, Sales, AutomobileVO. The Sales model gets data from the three other models and interacts with them.
+### Sales models
+The back end of the sales microservice has 4 models: Customer, Salesperson, Sale, and AutomobileVO. The Sales model gets data from the three other models and interacts with them.
 
-The AutomobileVO is a value object that gets data from the automobiles in the inventory using a poller. The sales poller polls the inventory microservice automatically for data, keeping the sales microservice up to date. This enables the user to select which car to be sold, having already filtered out the cars previously sold.
+1. Customer Model
+   The Customer model contains the following fields:
+   * **first_name:** the first name of the customer
+   * **last_name:** the last name of the customer
+   * **address:** the address of the customer
+   * **phone_number:** the phone number of the customer
+
+2. Salesperson Model
+   The Salesperson model contains the following fields. Each sales person is associated with a sale based on their id, not their employee_id.
+   * **first_name:** the first name of the salesperson
+   * **last_name:** the last name of the salesperson
+   * **employee_id:** the unique identifier of each salesperson
 
 
-## Accessing Endpoints through Insomnia to Send and View Data:
+3. AutomobileVO Model
+   The AutomobileVO model is updated every 60 seconds with VINs from the Inventory service, using a **poller. Each automobile is associated with a sale, based on the automobile’s VIN. The AutomobileVO model contains the following fields.
+   * **vin:** the VIN is a unique identifier of each car
+   * **sold:** the Boolean value status of the vehicle on whether or not it was sold
+
+
+4. Sale Model
+   The Sale model contains the following fields, and within each sale, a salesperson, customer, and automobile are assigned.
+   * **automobile:** the automobile sold
+   * **salesperson:** the salesperson who sold the automobile
+   * **customer:** the customer to whom the automobile was sold
+   * **price:** the price at which the automobile was sold
+
+Note: The AutomobileVO is a value object that gets data from the automobiles in the inventory using a poller. The sales poller polls the inventory microservice automatically for data, keeping the sales microservice up to date. This enables the user to select which car to be sold in a dropdown which automatically excludes the cars that have a status of sold.
+
+
+**Accessing Endpoints through Insomnia to Send and View Data:**
 
 ### Customers:
-
 
 | Action | Method | URL
 | ----------- | ----------- | ----------- |
@@ -491,43 +522,49 @@ The AutomobileVO is a value object that gets data from the automobiles in the in
 | Create a customer | POST | http://localhost:8090/api/customers/
 | Show a specific customer | GET | http://localhost:8090/api/customers/id/
 
-To create a Customer (SEND THIS JSON BODY):
-```
+
+**To create a Customer (SEND THIS JSON BODY):**
+```json
 {
-	"name": "John Johns",
-	"address": "1212 Ocean Street",
+	"first_name": "Jehosophat",
+	"last_name": "Trigger",
+	"address": "1212 Sherwood Street",
 	"phone_number": 9804357878
 }
 ```
-Return Value of Creating a Customer:
-```
+**Return Value of Creating a Customer:**
+```json
 {
-	"id: "1",
-	"name": "John Johns",
-	"address": "1212 Ocean Street",
-	"phone_number": 9804357878
+	"first_name": "Jehosophat",
+	"last_name": "Trigger",
+	"address": "1212 Sherwood Street",
+	"phone_number": 9804357878,
+	"id": 1
 }
 ```
-Return value of Listing all Customers:
-```
+**Return value of Listing all Customers:**
+```json
 {
 	"customers": [
 		{
-			"id",
-			"name": "Martha Stewart",
-			"address": "1313 Baker Street",
-			"phone_number": "980720890"
-		},
+			"first_name": "Jehosophat",
+			"last_name": "Trigger",
+			"address": "1212 Sherwood Street",
+			"phone_number": "9804357878",
+			"id": 1
+		}
 		{
-			"id",
-			"name": "John Johns",
-			"address": "1212 Ocean Street",
-			"phone_number": "9804357878"
+			"first_name": "Johnny",
+			"last_name": "Tremain",
+			"address": "1892 Tea Party Road",
+			"phone_number": "9801234563",
+			"id": 2
 		}
 	]
 }
 ```
 ### Salespeople:
+
 | Action | Method | URL
 | ----------- | ----------- | ----------- |
 | List salespeople | GET | http://localhost:8090/api/salespeople/
@@ -536,114 +573,132 @@ Return value of Listing all Customers:
 | Delete a salesperson | DELETE | http://localhost:8090/api/salesperson/id/
 
 
-To create a salesperson (SEND THIS JSON BODY):
-```
+**To create a salesperson (SEND THIS JSON BODY):**
+```json
 {
-	"name": "Jane Doe",
-	"employee_number": 1
+	"first_name": "Cleopatra",
+	"last_name": "Jones",
+	"employee_id": "1382ei"
 }
 ```
-Return Value of creating a salesperson:
-```
+**Return Value of creating a salesperson:**
+```json
 {
-	"id": 1,
-	"name": "Liz",
-	"employee_number": 1
+	"first_name": "Cleopatra",
+	"last_name": "Jones",
+	"employee_id": "1382ei",
+	"id": 1
 }
 ```
-List all salespeople Return Value:
-```
+**List all salespeople Return Value:**
+```json
 {
 	"salespeople": [
 		{
-			"id": 1,
-			"name": "Jane Doe",
-			"employee_number": 1
+			"first_name": "Cleopatra",
+			"last_name": "Jones",
+			"employee_id": "1382ei",
+			"id": 1
+		},
+		{
+			"first_name": "Sabrina",
+			"last_name": "Jortsons",
+			"employee_id": "1dfhe4ei",
+			"id": 2
 		}
 	]
 }
 ```
 ### Sales:
-- the id value to show a salesperson's Sales is the **"id" value tied to a salesperson.**
+
 
 | Action | Method | URL
 | ----------- | ----------- | ----------- |
 | List all Sales | GET | http://localhost:8090/api/Sales/
 | Create a new sale | POST | http://localhost:8090/api/Sales/
-| Show salesperson's Sales | GET | http://localhost:8090/api/Sales/id/
+| Delete a Sale | DELETE | http://localhost:8090/api/Sales/id/
+| Show Sale's Details | GET | http://localhost:8090/api/Sales/id/
+*The id value is used to show a salesperson's Sales is the **"id" value tied to a salesperson**.*
 
-List all Sales Return Value:
-```
+**List all Sales Return Value:**
+```json
 {
 	"sales": [
 		{
-			"id": 1,
-			"price": 111000,
-			"vin": {
-				"vin": "111"
-			},
-			"salesperson": {
-				"id": 1,
-				"name": "Liz",
-				"employee_number": 1
-			},
-			"customer": {
-				"name": "Martha Stewart",
-				"address": "1313 Baker Street",
-				"phone_number": "980720890"
-			}
+			"id": 4,
+			"price": 3125,
+			"automobile": "1234567"
+		},
+		"salesperson": {
+			"first_name": "Cleopatra",
+			"last_name": "Jones",
+			"employee_id": "1382ei",
+			"id": 3
+		},
+		"customer": {
+			"first_name": "Jehosophat",
+			"last_name": "Trigger",
+			"address": "1212 Sherwood Street",
+			"phone_number": "9804357878",
+			"id": 1
 		}
 	]
 }
 ```
-Create a New Sale (SEND THIS JSON BODY):
-```
+**Create a New Sale (SEND THIS JSON BODY):**
+```json
 {
-	"salesperson": "Liz",
-	"customer": "John Johns",
-	"vin": "888",
-	"price": 40000
+	"price": "3125",
+	"automobile": "1234567",
+	"salesperson": "3",
+	"customer": "1"
 }
 ```
-Return Value of Creating a New Sale:
-```
+**Return Value of Creating a New Sale:**
+```json
 {
-	"id": 4,
-	"price": 40000,
-	"vin": {
-		"vin": "888"
+	{
+		"id": 4,
+		"price": 3125,
+		"automobile": "1234567"
 	},
 	"salesperson": {
-		"id": 1,
-		"name": "Liz",
-		"employee_number": 1
+		"first_name": "Cleopatra",
+		"last_name": "Jones",
+		"employee_id": "1382ei",
+		"id": 3
 	},
 	"customer": {
-		"id",
-		"name": "John Johns",
-		"address": "1212 Ocean Street",
-		"phone_number": "9804357878"
+		"first_name": "Jehosophat",
+		"last_name": "Trigger",
+		"address": "1212 Sherwood Street",
+		"phone_number": "9804357878",
+		"id": 1
 	}
 }
 ```
-Show a Salesperson's Sales Return Value:
-```
+**Show a Salesperson's Sales Return Value:**
+```json
 {
-	"id": 1,
-	"price": 111000,
-	"vin": {
-		"vin": "111"
-	},
-	"salesperson": {
-		"id": 1,
-		"name": "Liz",
-		"employee_number": 1
-	},
-	"customer": {
-		"id",
-		"name": "Martha Stewart",
-		"address": "1313 Baker Street",
-		"phone_number": "980720890"
-	}
+	"sales": [
+		{
+			"id": 4,
+			"price": 3125,
+			"automobile": "1234567"
+		},
+		"salesperson": {
+			"first_name": "Cleopatra",
+			"last_name": "Jones",
+			"employee_id": "1382ei",
+			"id": 3
+		},
+		"customer": {
+			"first_name": "Jehosophat",
+			"last_name": "Trigger",
+			"address": "1212 Sherwood Street",
+			"phone_number": "9804357878",
+			"id": 1
+		}
+	]
 }
 ```

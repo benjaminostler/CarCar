@@ -82,7 +82,7 @@ def api_salespeople(request):
 def api_salesperson(request, pk):
     if request.method == "GET":
         try:
-            salesperson = Salesperson.objects.get(id=pk)
+            salesperson = Salesperson.objects.get(employee_id=pk)
             return JsonResponse(
                 salesperson,
                 encoder=SalespersonEncoder,
@@ -194,7 +194,7 @@ def api_sale(request, pk):
             response = JsonResponse({"message": "Does not exist"})
             response.status_code = 404
             return response
-    else:
+    else:  # DELETE
         try:
             sale = Sale.objects.get(id=pk)
             automobile = AutomobileVO.objects.get(vin=sale.automobile.vin)
