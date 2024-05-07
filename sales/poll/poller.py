@@ -13,7 +13,7 @@ from sales_rest.models import AutomobileVO
 
 
 def get_Automobiles():
-    response = requests.get("http://project-beta-inventory-api-1:8000/api/automobiles")
+    response = requests.get("http://carcar-inventory-api-1:8000/api/automobiles")
     content = json.loads(response.content)
     for automobile in content["autos"]:
         if automobile["sold"] is True:

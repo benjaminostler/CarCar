@@ -53,6 +53,7 @@ MIDDLEWARE = [
 ALLOWED_HOSTS = [
     "localhost",
     "project-beta-inventory-api-1",
+    "carcar-inventory-api-1",
     "inventory-api",
     "sales-api",
     "service-api",
